@@ -1,81 +1,67 @@
 # Tagify
 
-Marketing site and customer dashboard for **Tagify**, a server-side tracking platform
-(Tagify Gateway + hosted sGTM containers).
+Marketing site and customer dashboard for **Tagify**, a server-side tracking platform. Advertisers route their
+conversion events through a Tagify Gateway or a hosted server-side GTM container, then see in one dashboard that
+every event reached GA4, Google Ads, Meta and TikTok.
 
-Every new account gets a demo workspace: a Gateway with destinations and 30 days of analytics,
-a running sGTM container and a live event stream. Container provisioning, DNS checks, OAuth
-connections and ad-platform delivery are simulated.
+**Live demo:** [tagify-brown.vercel.app](https://tagify-brown.vercel.app)
 
-## Stack
+![Tagify landing page](docs/landing.webp)
 
-- **Next.js 16** (App Router, Route Handlers, Cache Components) + **React 19**
-- **Better Auth** with **MongoDB**: email/password, Google, GitHub, password reset
-- **MongoDB** aggregations for analytics, **Zod** for request validation
-- **TanStack Query**, **Tailwind CSS v4**, Radix UI, Recharts
+## Features
 
-## Getting started
+**Accounts and security**
+- Sign up and sign in with email and password, Google or GitHub, with password reset
+- Sessions checked on the server for every dashboard page and API route
+- Admin area for managing users and plans, limited to admin accounts
 
-```bash
-npm install
-cp .env.example .env
-npm run dev
-```
+**A working demo from the first sign-in**
+- Every new account gets a seeded workspace: a gateway with destinations, 30 days of analytics, a running
+  sGTM container and a live event stream
 
-Open http://localhost:3000.
+**Tracking Gateway**
+- Destinations (receivers) for Meta Conversions API, Google Ads and TikTok, added and removed from the dashboard
+- Google Ads connection status for each gateway
+- Analytics per gateway: events over time, delivery by destination and match quality
+- Live events page that streams new events as they arrive
 
-### Environment
+**Hosted sGTM containers**
+- Create and manage server-side Google Tag Manager containers, each on its own custom domain with DNS checks
 
-| Variable                                    | Purpose                                         |
-| ------------------------------------------- | ----------------------------------------------- |
-| `BETTER_AUTH_SECRET`                        | Signing secret (`openssl rand -base64 32`)      |
-| `BETTER_AUTH_URL` / `NEXT_PUBLIC_APP_URL`   | Public URL of this app                          |
-| `MONGODB_URI`                               | MongoDB connection string (db name in the path) |
-| `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | Google OAuth app                                |
-| `GITHUB_CLIENT_ID` / `GITHUB_CLIENT_SECRET` | GitHub OAuth app                                |
+**Dashboard essentials**
+- Notifications, workspace settings and plan limits
+- Fast, responsive UI with charts, dialogs, toasts and date-range pickers
 
-OAuth callback URLs: `<app-url>/api/auth/callback/google` and `<app-url>/api/auth/callback/github`.
+**Marketing site**
+- Landing, features, how it works, pricing, FAQ, blog, contact, affiliate program and legal pages
 
-## Project structure
+![Live events and analytics](docs/dashboard.webp)
 
-```
-src/
-├── app/
-│   ├── (marketing)/   Public pages (landing, pricing, blog, legal)
-│   ├── (auth)/        Login, signup, forgot/reset password
-│   ├── dashboard/     Gateways, sGTM containers, analytics, live events, settings, admin
-│   └── api/           Better Auth + dashboard API route handlers
-├── components/        Shared UI (ui/ = Radix-based primitives)
-├── lib/               Auth config, MongoDB client, fetch wrapper, plans
-├── server/            Data access, analytics pipelines, demo seeding
-└── proxy.ts           Redirects signed-out users away from /dashboard
-```
+## Technology
 
-## How it works
+| Area | Tools |
+| --- | --- |
+| Framework | Next.js 16 (App Router, Route Handlers, Cache Components), React 19, TypeScript |
+| Authentication | Better Auth (email and password, Google OAuth, GitHub OAuth) |
+| Database | MongoDB, with aggregation pipelines for analytics |
+| Data fetching and validation | TanStack Query, Zod |
+| UI | Tailwind CSS v4, Radix UI, Recharts, Lucide icons, Sonner toasts |
+| Hosting | Vercel |
 
-- Sessions are Better Auth cookies. `proxy.ts` does a fast cookie check, the dashboard layout and
-  every API route validate the session on the server.
-- A `user.create` database hook seeds the demo workspace for each new account.
-- Analytics are computed with MongoDB aggregation pipelines over the `events` collection.
-- The live events page is a Server-Sent Events stream that polls for new events, so it works on
-  serverless hosts.
-- Admin routes require `user.role === "admin"`, set directly in the `user` collection.
+## How it's built
 
-## Deploying to Vercel
+- **Live events on serverless hosting.** The live page is a Server-Sent Events stream that checks MongoDB for new
+  events every few seconds, so it works on Vercel without a separate WebSocket server.
+- **Analytics without a data warehouse.** Charts are computed with MongoDB aggregation pipelines over the events
+  collection, indexed by workspace and time.
+- **Demo data on sign-up.** A database hook on account creation seeds the demo workspace.
+- **Two layers of access control.** A quick cookie check redirects signed-out visitors, and every dashboard layout
+  and API route validates the session on the server. Admin routes also check the user's role.
 
-1. Import the repository in Vercel.
-2. Add the environment variables above, with `BETTER_AUTH_URL` and `NEXT_PUBLIC_APP_URL` set to
-   the Vercel URL.
-3. Add the production callback URLs to the Google and GitHub OAuth apps.
-4. In MongoDB Atlas, allow network access from Vercel (`0.0.0.0/0`).
+In this public version, container provisioning, DNS checks, OAuth connections and delivery to ad platforms are
+simulated, so the demo is safe to explore.
 
-## Scripts
+---
 
-| Command             | Description                |
-| ------------------- | -------------------------- |
-| `npm run dev`       | Start the dev server       |
-| `npm run build`     | Production build           |
-| `npm run start`     | Serve the production build |
-| `npm run lint`      | ESLint                     |
-| `npm run typecheck` | TypeScript, no emit        |
-| `npm run format`    | Prettier                   |
+Built by [Khairul Islam Bappy](https://bappycode.vercel.app) · [GitHub](https://github.com/bappycode) ·
+[LinkedIn](https://www.linkedin.com/in/khairul-islam-bappy/)
